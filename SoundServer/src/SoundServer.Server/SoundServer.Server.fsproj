@@ -4,10 +4,12 @@
     <TargetFramework>netcoreapp5.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="BroadcastHub.fs" />
     <Compile Include="SoundService.fs" />
     <Compile Include="Startup.fs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="5.0.0" />
     <ProjectReference Include="..\SoundServer.Client\SoundServer.Client.fsproj" />
     <PackageReference Include="Bolero.Server" Version="0.*" />
     <PackageReference Include="Bolero.HotReload.Server" Version="0.*" />

@@ -10,14 +10,19 @@ open Bolero.Remoting
 open Bolero.Remoting.Server
 open SoundServer
 open Microsoft.Extensions.Logging
+open Microsoft.AspNetCore.SignalR
+open BlazorSignalRApp.Server.Hubs
 
-type SoundService(log: ILogger<SoundService>, ctx: IRemoteContext, env: IWebHostEnvironment) =
+type SoundService(log: ILogger<SoundService>, hub: IHubContext<BroadcastHub>, ctx: IRemoteContext, env: IWebHostEnvironment) =
     inherit RemoteHandler<Client.Main.SoundService>()
 
     override this.Handler = 
         {
             toggleSound = fun () -> async {
                 log.LogInformation("Todo: toggle sound.\n")
+                log.LogInformation($"{hub}")
+                hub.Clients.All.SendAsync("sending truc") |> ignore
+                log.LogInformation("Todo: toggle sound 2.\n")
                 ()
             }
         }

@@ -10,6 +10,8 @@ open Bolero.Remoting.Server
 open Bolero.Server.RazorHost
 open SoundServer
 open Bolero.Templating.Server
+open Microsoft.AspNetCore.ResponseCompression
+open BlazorSignalRApp.Server.Hubs
 
 type Startup() =
 
@@ -26,9 +28,14 @@ type Startup() =
             .AddRemoting<SoundService>()
             .AddLogging()
             .AddBoleroHost()
+            // .AddResponseCompression(fun opts ->
+            //         opts.MimeTypes <- ResponseCompressionDefaults.MimeTypes.Concat([|"application/octet-stream" |])
+            //     )
+            
 #if DEBUG
             .AddHotReload(templateDir = __SOURCE_DIRECTORY__ + "/../SoundServer.Client")
 #endif
+            .AddSignalR()
         |> ignore
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -44,6 +51,7 @@ type Startup() =
                 endpoints.UseHotReload()
 #endif
                 endpoints.MapBlazorHub() |> ignore
+                endpoints.MapHub<BroadcastHub>("/broadcasthub") |> ignore
                 endpoints.MapFallbackToPage("/_Host") |> ignore)
         |> ignore
 
