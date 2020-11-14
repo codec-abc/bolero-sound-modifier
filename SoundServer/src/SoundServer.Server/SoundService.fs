@@ -20,8 +20,8 @@ type SoundService(log: ILogger<SoundService>, hub: IHubContext<BroadcastHub>, ct
         {
             toggleSound = fun () -> async {
                 log.LogInformation("Todo: toggle sound.\n")
-                log.LogInformation($"{hub}")
-                hub.Clients.All.SendAsync("sending truc") |> ignore
+                let task = hub.Clients.All.SendAsync("ReceiveMessage", "Test")
+                log.LogInformation("=== Sending message ===")
                 log.LogInformation("Todo: toggle sound 2.\n")
                 ()
             }

@@ -7,8 +7,8 @@ open Bolero.Html
 open Bolero.Remoting
 open Bolero.Remoting.Client
 open Bolero.Templating.Client
+open Microsoft.AspNetCore.SignalR.Client
 
-/// Routing endpoints definition.
 type Page =
     | [<EndPoint "/">] Home
     | [<EndPoint "/sound">] Sound
@@ -58,7 +58,6 @@ let update remote message model =
     | ClearError ->
         { model with error = None }, Cmd.none
 
-/// Connects the routing system to the Elmish application.
 let router = Router.infer SetPage (fun model -> model.page)
 
 type Main = Template<"wwwroot/main.html">
@@ -106,6 +105,21 @@ type MyApp() =
     override this.Program =
         let soundService = this.Remote<SoundService>()
         let update = update soundService
+        let hubConnectionBuilder = HubConnectionBuilder()
+
+        let uri = this.NavigationManager.ToAbsoluteUri("/broadcasthub")
+
+        let hubConnection = 
+            hubConnectionBuilder
+                .WithUrl(uri)
+                .Build()
+
+        hubConnection.On<string>("ReceiveMessage", fun user -> 
+            Console.WriteLine("message is " + user)
+        ) |> ignore
+            
+        hubConnection.StartAsync() |> ignore
+
         Program.mkProgram (fun _ -> initModel, Cmd.none) update view
         |> Program.withRouter router
 #if DEBUG
