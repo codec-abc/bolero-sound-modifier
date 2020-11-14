@@ -24,6 +24,7 @@ type Startup() =
                 .AddCookie()
                 .Services
             .AddRemoting<SoundService>()
+            .AddLogging()
             .AddBoleroHost()
 #if DEBUG
             .AddHotReload(templateDir = __SOURCE_DIRECTORY__ + "/../SoundServer.Client")

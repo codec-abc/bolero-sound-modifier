@@ -12,8 +12,6 @@ open Bolero.Templating.Client
 type Page =
     | [<EndPoint "/">] Home
     | [<EndPoint "/sound">] Sound
-    // | [<EndPoint "/counter">] Counter
-    // | [<EndPoint "/data">] Data
 
 type Model = 
     {
@@ -31,8 +29,6 @@ let initModel =
         error = None
     }
 
-
-
 type SoundService = 
     { 
         toggleSound: unit -> Async<unit>
@@ -45,33 +41,20 @@ type SoundService =
 type Message =
     | SetPage of Page
     | Error of exn
+    | ToggleSound
     | ClearError
 
-//let update remote message model =
-let update message model =
-    // let onSignIn = function
-    //     | Some _ -> Cmd.ofMsg GetBooks
-    //     | None -> Cmd.none
+let update remote message model =
+
     match message with
     | SetPage page ->
         { model with page = page }, Cmd.none
-
-    // | Increment ->
-    //     { model with counter = model.counter + 1 }, Cmd.none
-    // | Decrement ->
-    //     { model with counter = model.counter - 1 }, Cmd.none
-    // | SetCounter value ->
-    //     { model with counter = value }, Cmd.none
-
-    // | GetBooks ->
-    //     let cmd = Cmd.OfAsync.either remote.getBooks () GotBooks Error
-    //     { model with books = None }, cmd
-    // | GotBooks books ->
-    //     { model with books = Some books }, Cmd.none
-
-
-    // | Error RemoteUnauthorizedException ->
-    //     { model with error = Some "You have been logged out."; signedInAs = None }, Cmd.none
+    | ToggleSound -> 
+        printfn "Todo: Toggle sound"
+        let newValue = (not model.playingSound)
+        let waitAsync = remote.toggleSound()
+        let task = Async.StartImmediateAsTask (remote.toggleSound())
+        { model with playingSound = newValue }, Cmd.none
     | Error exn ->
         { model with error = Some exn.Message }, Cmd.none
     | ClearError ->
@@ -86,48 +69,9 @@ let homePage model dispatch =
     Main.Home().Elt()
 
 let soundPage model dispatch =
-    Main.Sound().Elt()
-
-// let counterPage model dispatch =
-//     Main.Counter()
-//         .Decrement(fun _ -> dispatch Decrement)
-//         .Increment(fun _ -> dispatch Increment)
-//         .Value(model.counter, fun v -> dispatch (SetCounter v))
-//         .Elt()
-
-// let dataPage model (username: string) dispatch =
-//     Main.Data()
-//         .Reload(fun _ -> dispatch GetBooks)
-//         .Username(username)
-//         .SignOut(fun _ -> dispatch SendSignOut)
-//         .Rows(cond model.books <| function
-//             | None ->
-//                 Main.EmptyData().Elt()
-//             | Some books ->
-//                 forEach books <| fun book ->
-//                     tr [] [
-//                         td [] [text book.title]
-//                         td [] [text book.author]
-//                         td [] [text (book.publishDate.ToString("yyyy-MM-dd"))]
-//                         td [] [text book.isbn]
-//                     ])
-//         .Elt()
-
-// let signInPage model dispatch =
-//     Main.SignIn()
-//         .Username(model.username, fun s -> dispatch (SetUsername s))
-//         .Password(model.password, fun s -> dispatch (SetPassword s))
-//         .SignIn(fun _ -> dispatch SendSignIn)
-//         .ErrorNotification(
-//             cond model.signInFailed <| function
-//             | false -> empty
-//             | true ->
-//                 Main.ErrorNotification()
-//                     .HideClass("is-hidden")
-//                     .Text("Sign in failed. Use any username and the password \"password\".")
-//                     .Elt()
-//         )
-//         .Elt()
+    Main.Sound()
+        .ToggleSound(fun _ -> dispatch ToggleSound)
+        .Elt()
 
 let menuItem (model: Model) (page: Page) (text: string) =
     Main.MenuItem()
@@ -146,11 +90,6 @@ let view model dispatch =
             cond model.page <| function
             | Home -> homePage model dispatch
             | Sound -> soundPage model dispatch
-            // | Counter -> counterPage model dispatch
-            // | Data ->
-            //     cond model.signedInAs <| function
-            //     | Some username -> dataPage model username dispatch
-            //     | None -> signInPage model dispatch
         )
         .Error(
             cond model.error <| function
@@ -167,8 +106,8 @@ type MyApp() =
     inherit ProgramComponent<Model, Message>()
 
     override this.Program =
-        //let bookService = this.Remote<BookService>()
-        //let update = update bookService
+        let soundService = this.Remote<SoundService>()
+        let update = update soundService
         Program.mkProgram (fun _ -> initModel, Cmd.none) update view
         |> Program.withRouter router
 #if DEBUG
