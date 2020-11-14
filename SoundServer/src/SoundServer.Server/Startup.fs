@@ -55,6 +55,7 @@ module Program =
             .CreateDefaultBuilder(args)
             .UseStaticWebAssets()
             .UseStartup<Startup>()
+            .UseUrls("http://0.0.0.0:5000/")
             .Build()
             .Run()
         0

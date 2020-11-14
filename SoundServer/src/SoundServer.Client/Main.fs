@@ -37,7 +37,6 @@ type SoundService =
     interface IRemoteService with
         member this.BasePath = "/books"
 
-/// The Elmish application's update messages.
 type Message =
     | SetPage of Page
     | Error of exn
@@ -45,7 +44,6 @@ type Message =
     | ClearError
 
 let update remote message model =
-
     match message with
     | SetPage page ->
         { model with page = page }, Cmd.none
