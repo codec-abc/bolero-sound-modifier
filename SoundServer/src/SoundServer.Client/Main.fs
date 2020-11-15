@@ -48,7 +48,6 @@ let update remote message model =
     | SetPage page ->
         { model with page = page }, Cmd.none
     | ToggleSound -> 
-        printfn "Todo: Toggle sound"
         let newValue = (not model.playingSound)
         let waitAsync = remote.toggleSound()
         let task = Async.StartImmediateAsTask (remote.toggleSound())

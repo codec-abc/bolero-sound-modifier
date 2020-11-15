@@ -4,6 +4,7 @@
     <TargetFramework>netcoreapp5.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="SoundPlayer.fs" />
     <Compile Include="BroadcastHub.fs" />
     <Compile Include="SoundService.fs" />
     <Compile Include="Startup.fs" />

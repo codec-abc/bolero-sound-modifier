@@ -19,10 +19,14 @@ type SoundService(log: ILogger<SoundService>, hub: IHubContext<BroadcastHub>, ct
     override this.Handler = 
         {
             toggleSound = fun () -> async {
-                log.LogInformation("Todo: toggle sound.\n")
-                let task = hub.Clients.All.SendAsync("ReceiveMessage", "Test")
+                //let task = hub.Clients.All.SendAsync("ReceiveMessage", "Test")
+                BroadcastHub.SendMessageToClients(hub.Clients.All)
+                try
+                    SoundPlayer.playSound()
+                with | e -> 
+                    let msg: String = "Unable to play sound " + e.Message
+                    log.LogInformation(msg)
                 log.LogInformation("=== Sending message ===")
-                log.LogInformation("Todo: toggle sound 2.\n")
                 ()
             }
         }

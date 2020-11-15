@@ -11,6 +11,11 @@ type BroadcastHub(log: ILogger<BroadcastHub>) =
     inherit Hub()
 
     member this.SendMessage() =  
-        let task = this.Clients.All.SendAsync("ReceiveMessage", "Test")
-        log.LogInformation("=== Sending message ===")
+        BroadcastHub.SendMessageToClients(this.Clients.All)
+        //let task = this.Clients.All.SendAsync("ReceiveMessage", "Test")
+        //log.LogInformation("=== Sending message ===")
+        ()
+
+    static member SendMessageToClients(clients: IClientProxy) =
+        let task = clients.SendAsync("ReceiveMessage", "Test")
         ()
