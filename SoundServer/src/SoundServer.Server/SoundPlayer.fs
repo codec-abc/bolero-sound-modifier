@@ -6,6 +6,8 @@ open System.Threading
 
 module SoundPlayer =
 
+    let mutable soundProcess: Option<Process> = None
+
     let private callAPlay (filename: string) =
         let escapedArgs = filename.Replace("\"", "\\\"")
 
@@ -22,18 +24,15 @@ module SoundPlayer =
         let mutable myProcess = new Process()
         myProcess.StartInfo <- startInfo
         let startResult = myProcess.Start()
-
-        // Thread.Sleep(2000)
-        // myProcess.Kill()
+        soundProcess <- Some(myProcess)
         (myProcess, startResult)
 
+    let killSound () =
+        if soundProcess.IsSome then
+            try
+                soundProcess.Value.Kill()
+            with _ -> ()
 
     let playSound () =
+        killSound()
         callAPlay "/home/codec/soundTest/test.wav" |> ignore
-    
-// [<EntryPoint>]
-// let main argv =
-//     printfn "starting"
-//     callAPlay "/home/codec/soundTest/test.wav" |> ignore
-//     printfn "done"
-//     0 // return an integer exit code
