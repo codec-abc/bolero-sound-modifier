@@ -99,9 +99,8 @@ let update remote message model =
             updateLocalSoundMessage remote sndMsg model.localSoundModel
         { model with localSoundModel = soundModel }, command
     | ServerSoundUpdate serverMsg -> 
-        Console.WriteLine("Server message received " + serverMsg.ToString())
-        // TODO
-        { model with error = None }, Cmd.none
+        //Console.WriteLine("Server message received " + serverMsg.ToString())
+        { model with serverSoundModel = Some(serverMsg) }, Cmd.none
     | Error exn ->
         { model with error = Some exn.Message }, Cmd.none
     | ClearError ->
@@ -120,8 +119,42 @@ type Main = Template<"wwwroot/main.html">
 let homePage model dispatch =
     Main.Home().Elt()
 
+let getSoundServerState (model: Option<ServerSoundModel>) =
+    match model with
+    | None -> 
+        div [] [
+            div [ attr.classes ["field"]] [text "No information yet"]
+        ]
+    | Some(soundModel) ->
+        let isPlayingText =
+            if soundModel.isPlaying then
+                "✔"
+            else 
+                "❌"
+
+        let frequencyText = if soundModel.frequency.IsSome then soundModel.frequency.Value.ToString() else "No Frequency"
+        let timeoutText = if soundModel.remainingTime.IsSome then soundModel.remainingTime.Value.ToString() else "♾️"
+
+        div [] [
+            div [ attr.classes ["field"]] [
+                label []  [text "Playing: "]
+                text isPlayingText
+                ]
+
+            div [ attr.classes ["field"]] [
+                label []  [text "Frequency: "]
+                text frequencyText
+                ]
+
+            div [ attr.classes ["field"]] [
+                label []  [text "Timeout: "]
+                text timeoutText
+                ]
+        ]
+
 let soundPage (model: Model) (dispatch: Dispatch<Message>) =
-    Main.Sound()
+    Main
+        .Sound()
         .localSoundModelShouldBePlayingSound(
             model.localSoundModel.shouldBePlayingSound, 
             fun n ->
@@ -147,6 +180,9 @@ let soundPage (model: Model) (dispatch: Dispatch<Message>) =
         )
         .ValidateSoundSettings(fun args -> 
             dispatch <| LocalSoundMessage ValidateSoundSettings
+        )
+        .ServerSoundState(
+            getSoundServerState model.serverSoundModel
         )
         .Elt()
 

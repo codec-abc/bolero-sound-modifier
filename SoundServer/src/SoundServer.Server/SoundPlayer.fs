@@ -42,6 +42,6 @@ module SoundPlayer =
         )
 
     let playSound (logger: ILogger, frequency: int, timeout: Option<int>) =
-        // Todo: use timer
+        // Todo: use timer and warn clients on remaining times every minutes
         killSound(logger)
         callAPlay(frequency, logger)
