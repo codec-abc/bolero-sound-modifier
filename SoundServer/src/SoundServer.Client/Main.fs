@@ -206,7 +206,6 @@ type MyApp() =
                     
             Cmd.ofSub sub
 
-        //Program.mkProgram (fun _ -> initModel, Cmd.none) update view
         Program.mkProgram (fun _ -> initModel, Cmd.ofMsg GetSoundServerState) update view
         |> Program.withSubscription subscription
         |> Program.withRouter router
