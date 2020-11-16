@@ -98,8 +98,7 @@ let update remote message model =
         let (soundModel, command) = 
             updateLocalSoundMessage remote sndMsg model.localSoundModel
         { model with localSoundModel = soundModel }, command
-    | ServerSoundUpdate serverMsg -> 
-        //Console.WriteLine("Server message received " + serverMsg.ToString())
+    | ServerSoundUpdate serverMsg ->
         { model with serverSoundModel = Some(serverMsg) }, Cmd.none
     | Error exn ->
         { model with error = Some exn.Message }, Cmd.none
@@ -223,7 +222,7 @@ type MyApp() =
         let update = update soundService
         let hubConnectionBuilder = HubConnectionBuilder()
 
-        let uri = this.NavigationManager.ToAbsoluteUri("/broadcasthub")
+        let uri = this.NavigationManager.ToAbsoluteUri(HubNames.broadcastHuburl)
 
         let hubConnection = 
             hubConnectionBuilder

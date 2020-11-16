@@ -28,9 +28,6 @@ type Startup() =
             .AddRemoting<SoundService>()
             .AddLogging()
             .AddBoleroHost()
-            // .AddResponseCompression(fun opts ->
-            //         opts.MimeTypes <- ResponseCompressionDefaults.MimeTypes.Concat([|"application/octet-stream" |])
-            //     )
             
 #if DEBUG
             .AddHotReload(templateDir = __SOURCE_DIRECTORY__ + "/../SoundServer.Client")
@@ -51,7 +48,7 @@ type Startup() =
                 endpoints.UseHotReload()
 #endif
                 endpoints.MapBlazorHub() |> ignore
-                endpoints.MapHub<BroadcastHub>("/broadcasthub") |> ignore
+                endpoints.MapHub<BroadcastHub>(HubNames.broadcastHuburl) |> ignore
                 endpoints.MapFallbackToPage("/_Host") |> ignore)
         |> ignore
 
