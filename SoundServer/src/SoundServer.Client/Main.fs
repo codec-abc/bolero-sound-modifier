@@ -89,11 +89,10 @@ let updateLocalSoundMessage remote (message: LocalSoundMessage) (model: LocalSou
     | SetTimerValue(timerValue) -> 
         { model with timeoutValue = timerValue }, Cmd.none
     | ValidateSoundSettings ->
-        Console.WriteLine("Model is " +  model.ToString())
+        // Console.WriteLine("Model is " +  model.ToString())
         // TODO: send model
         //let task = Async.StartImmediateAsTask (remote.toggleSound(toggleSoundValue))
         model, Cmd.none
-
 
 let update remote message model =
     match message with
@@ -102,7 +101,7 @@ let update remote message model =
     | LocalSoundMessage sndMsg ->
         let (soundModel, command) = 
             updateLocalSoundMessage remote sndMsg model.localSoundModel
-        
+        Console.WriteLine("Model is " +  soundModel.ToString())
         { model with localSoundModel = soundModel }, command
     | Error exn ->
         { model with error = Some exn.Message }, Cmd.none

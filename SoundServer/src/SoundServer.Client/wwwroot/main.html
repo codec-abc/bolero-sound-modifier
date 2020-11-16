@@ -28,21 +28,30 @@
 
       <template id="Sound">
         <h1 class="title">A sound modifier 🎼🔊</h1>
-        <form>
-          Play sound:
-          <input type="checkbox" bind="${localSoundModelShouldBePlayingSound}" />
-          
-          Frequency: ${localSoundModelFrequency}
-          <input type="range" bind="${localSoundModelFrequency}" min="1" max="20" />
+        <div>
 
-          Has Timer:
-          <input type="checkbox" bind="${localSoundModelHasTimeout}" />
+          <div class="field">
+            <label class="label">Play sound:</label>
+            <input class="checkbox" type="checkbox" bind="${localSoundModelShouldBePlayingSound}" />
+          </div>
 
-          Timer Value: ${localSoundModelTimerValue}
-          <input type="range" bind="${localSoundModelTimerValue}" min="0" max="60" />
+          <div class="field">
+            <label class="label">Frequency: ${localSoundModelFrequency}</label>
+            <input class="range" type="range" bind="${localSoundModelFrequency}" min="1" max="20" />
+          </div>
 
-          <button onclick="${ValidateSoundSettings}" class="button">Validate Sound Settings</button>
-        </form>
+          <div class="field">
+            <label class="label">Has Timer:</label>
+            <input class="checkbox" type="checkbox" bind="${localSoundModelHasTimeout}" />
+          </div>
+
+          <div class="field">
+            <label class="label">Timer Value: ${localSoundModelTimerValue}</label>
+            <input class="range" type="range" bind="${localSoundModelTimerValue}" min="0" max="60"  />
+          </div>
+
+          <button class="button" onclick="${ValidateSoundSettings}">Validate Sound Settings</button>
+        </div>
       </template>
 
       <template id="ErrorNotification">
