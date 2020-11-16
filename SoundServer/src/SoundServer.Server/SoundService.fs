@@ -12,19 +12,27 @@ open SoundServer
 open Microsoft.Extensions.Logging
 open Microsoft.AspNetCore.SignalR
 open BlazorSignalRApp.Server.Hubs
+open SoundServer.Client.Main
 
 type SoundService(log: ILogger<SoundService>, hub: IHubContext<BroadcastHub>, ctx: IRemoteContext, env: IWebHostEnvironment) =
     inherit RemoteHandler<Client.Main.SoundService>()
 
+    let mutable isPlaying = false
+    let mutable frequency: Option<int> = None
+    let mutable timeout: Option<int> = None
+
     override this.Handler = 
         {
-            toggleSound = fun (isPlaying: bool) -> async {
+            toggleSound = fun (shouldPlay: bool) -> async {
+
                 //BroadcastHub.SendMessageToClients(hub.Clients.All)
+
+                isPlaying <- shouldPlay
                 try
                     if isPlaying then
                         log.LogInformation("=== PLAYING SOUND ====\n")
-                        let frequency = 8000
-                        SoundPlayer.playSound(log, frequency) |> ignore
+                        let freq = frequency.Value
+                        SoundPlayer.playSound(log, freq, timeout) |> ignore
                     else
                         log.LogInformation("=== STOP PLAYING SOUND ====\n")
                         SoundPlayer.killSound(log)
@@ -34,3 +42,11 @@ type SoundService(log: ILogger<SoundService>, hub: IHubContext<BroadcastHub>, ct
                 ()
             }
         }
+
+    member this.GetServerModel() =
+        let result : ServerSoundModel = 
+            {
+                isPlaying = isPlaying
+                frequency = frequency
+                remainingTime = None
+            } in result

@@ -41,6 +41,7 @@ module SoundPlayer =
                 with _ -> logger.LogInformation("Cannot kill process")
         )
 
-    let playSound (logger: ILogger, frequency: int) =
+    let playSound (logger: ILogger, frequency: int, timeout: Option<int>) =
+        // Todo: use timer
         killSound(logger)
         callAPlay(frequency, logger)
