@@ -55,6 +55,10 @@ type SoundService(log: ILogger<SoundService>, hub: IHubContext<BroadcastHub>, ct
                 BroadcastHub.SendSoundServerStatus(hub.Clients.All, this.GetServerModel())
 
             }
+
+            getSoundServerStatus = fun () -> async {
+                return this.GetServerModel()
+            }
         }
 
     member this.GetServerModel() =

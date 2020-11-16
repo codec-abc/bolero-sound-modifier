@@ -33,7 +33,7 @@ type Model =
         page: Page
         error: string option
         localSoundModel: LocalSoundModel
-        serverSoundModel: ServerSoundModel
+        serverSoundModel: Option<ServerSoundModel>
     }
 
 let initModel = 
@@ -49,17 +49,13 @@ let initModel =
                 timeoutValue = 60
             }
 
-        serverSoundModel = 
-            {
-                isPlaying = false
-                frequency = None
-                remainingTime = None
-            }
+        serverSoundModel = None
     }
 
 type SoundService = 
     { 
         updateSound : LocalSoundModel -> Async<unit>
+        getSoundServerStatus: unit -> Async<ServerSoundModel>
     }
 
     interface IRemoteService with
@@ -77,6 +73,7 @@ type Message =
     | Error of exn
     | LocalSoundMessage of LocalSoundMessage
     | ServerSoundUpdate of ServerSoundModel
+    | GetSoundServerState
     | ClearError
 
 let updateLocalSoundMessage remote (message: LocalSoundMessage) (model: LocalSoundModel) =
@@ -109,6 +106,12 @@ let update remote message model =
         { model with error = Some exn.Message }, Cmd.none
     | ClearError ->
         { model with error = None }, Cmd.none
+    | GetSoundServerState -> 
+        model, 
+        Cmd.OfAsync.either
+            remote.getSoundServerStatus ()
+            (ServerSoundUpdate)
+            Error
 
 let router = Router.infer SetPage (fun model -> model.page)
 
@@ -203,7 +206,8 @@ type MyApp() =
                     
             Cmd.ofSub sub
 
-        Program.mkProgram (fun _ -> initModel, Cmd.none) update view
+        //Program.mkProgram (fun _ -> initModel, Cmd.none) update view
+        Program.mkProgram (fun _ -> initModel, Cmd.ofMsg GetSoundServerState) update view
         |> Program.withSubscription subscription
         |> Program.withRouter router
 #if DEBUG
