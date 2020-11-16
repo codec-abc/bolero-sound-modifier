@@ -31,7 +31,7 @@ let initModel =
 
 type SoundService = 
     { 
-        toggleSound: unit -> Async<unit>
+        toggleSound: bool -> Async<unit>
     }
 
     interface IRemoteService with
@@ -40,18 +40,16 @@ type SoundService =
 type Message =
     | SetPage of Page
     | Error of exn
-    | ToggleSound
+    | ToggleSound of bool
     | ClearError
 
 let update remote message model =
     match message with
     | SetPage page ->
         { model with page = page }, Cmd.none
-    | ToggleSound -> 
-        let newValue = (not model.playingSound)
-        let waitAsync = remote.toggleSound()
-        let task = Async.StartImmediateAsTask (remote.toggleSound())
-        { model with playingSound = newValue }, Cmd.none
+    | ToggleSound toggleSoundValue ->
+        let task = Async.StartImmediateAsTask (remote.toggleSound(toggleSoundValue))
+        { model with playingSound = toggleSoundValue }, Cmd.none
     | Error exn ->
         { model with error = Some exn.Message }, Cmd.none
     | ClearError ->
@@ -64,9 +62,11 @@ type Main = Template<"wwwroot/main.html">
 let homePage model dispatch =
     Main.Home().Elt()
 
-let soundPage model dispatch =
+let soundPage (model: Model) (dispatch: Dispatch<Message>) =
     Main.Sound()
-        .ToggleSound(fun _ -> dispatch ToggleSound)
+        .ToggleSound(fun args -> 
+            dispatch <| ToggleSound (not model.playingSound)
+        )
         .Elt()
 
 let menuItem (model: Model) (page: Page) (text: string) =
@@ -76,7 +76,7 @@ let menuItem (model: Model) (page: Page) (text: string) =
         .Text(text)
         .Elt()
 
-let view model dispatch =
+let view model (dispatch: Dispatch<Message>) =
     Main()
         .Menu(concat [
             menuItem model Home "Home"
@@ -93,7 +93,7 @@ let view model dispatch =
             | Some err ->
                 Main.ErrorNotification()
                     .Text(err)
-                    .Hide(fun _ -> dispatch ClearError)
+                    .Hide(fun _ -> dispatch Message.ClearError)
                     .Elt()
         )
         .Elt()
@@ -114,7 +114,8 @@ type MyApp() =
                 .Build()
 
         hubConnection.On<string>("ReceiveMessage", fun user -> 
-            Console.WriteLine("message is " + user)
+            let toPrint = "message is " + user
+            Console.WriteLine(toPrint)
         ) |> ignore
             
         hubConnection.StartAsync() |> ignore

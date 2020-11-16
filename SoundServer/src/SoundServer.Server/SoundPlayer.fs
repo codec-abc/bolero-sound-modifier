@@ -8,6 +8,7 @@ open Microsoft.Extensions.Logging
 module SoundPlayer =
 
     let mutable soundProcess: Option<Process> = None
+    let soundProcessLock = Object()
 
     let private callAPlay (frequency: int, logger: ILogger) =
 
@@ -24,15 +25,22 @@ module SoundPlayer =
         let mutable myProcess = new Process()
         myProcess.StartInfo <- startInfo
         let startResult = myProcess.Start()
-        soundProcess <- Some(myProcess)
+
+        lock soundProcessLock (fun () -> 
+            soundProcess <- Some(myProcess)
+        )
+
         (myProcess, startResult)
 
     let killSound(logger: ILogger) =
-        if soundProcess.IsSome then
-            try
-                soundProcess.Value.Kill()
-            with _ -> logger.LogInformation("Cannot kill process")
 
-    let playSound (logger: ILogger) =
+        lock soundProcessLock (fun () -> 
+            if soundProcess.IsSome then
+                try
+                    soundProcess.Value.Kill()
+                with _ -> logger.LogInformation("Cannot kill process")
+        )
+
+    let playSound (logger: ILogger, frequency: int) =
         killSound(logger)
-        callAPlay(8000, logger)
+        callAPlay(frequency, logger)

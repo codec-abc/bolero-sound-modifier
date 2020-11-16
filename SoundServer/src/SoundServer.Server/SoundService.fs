@@ -18,10 +18,16 @@ type SoundService(log: ILogger<SoundService>, hub: IHubContext<BroadcastHub>, ct
 
     override this.Handler = 
         {
-            toggleSound = fun () -> async {
+            toggleSound = fun (isPlaying: bool) -> async {
                 //BroadcastHub.SendMessageToClients(hub.Clients.All)
                 try
-                    SoundPlayer.playSound(log) |> ignore
+                    if isPlaying then
+                        log.LogInformation("=== PLAYING SOUND ====\n")
+                        let frequency = 8000
+                        SoundPlayer.playSound(log, frequency) |> ignore
+                    else
+                        log.LogInformation("=== STOP PLAYING SOUND ====\n")
+                        SoundPlayer.killSound(log)
                 with | e -> 
                     let msg: String = "Unable to play sound " + e.Message
                     log.LogInformation(msg)
