@@ -23,11 +23,22 @@ type SoundService(log: ILogger<SoundService>, hub: IHubContext<BroadcastHub>, ct
 
     override this.Handler = 
         {
-            toggleSound = fun (shouldPlay: bool) -> async {
+            updateSound = fun (soundModel: LocalSoundModel) -> async {
 
-                //BroadcastHub.SendMessageToClients(hub.Clients.All)
+                isPlaying <- soundModel.shouldBePlayingSound
 
-                isPlaying <- shouldPlay
+                frequency <- 
+                    if soundModel.shouldBePlayingSound = true then
+                        Some <| soundModel.frequency
+                    else
+                        None
+                
+                timeout <- 
+                    if soundModel.shouldBePlayingSound = true && soundModel.hasTimeout then
+                        Some <| soundModel.timeoutValue
+                    else
+                        None
+
                 try
                     if isPlaying then
                         log.LogInformation("=== PLAYING SOUND ====\n")
@@ -40,6 +51,9 @@ type SoundService(log: ILogger<SoundService>, hub: IHubContext<BroadcastHub>, ct
                     let msg: String = "Unable to play sound " + e.Message
                     log.LogInformation(msg)
                 ()
+
+                BroadcastHub.SendSoundServerStatus(hub.Clients.All, this.GetServerModel())
+
             }
         }
 
