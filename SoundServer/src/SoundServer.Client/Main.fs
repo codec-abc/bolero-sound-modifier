@@ -76,6 +76,7 @@ type Message =
     | SetPage of Page
     | Error of exn
     | LocalSoundMessage of LocalSoundMessage
+    | ServerSoundUpdate of ServerSoundModel
     | ClearError
 
 let updateLocalSoundMessage remote (message: LocalSoundMessage) (model: LocalSoundModel) =
@@ -99,8 +100,11 @@ let update remote message model =
     | LocalSoundMessage sndMsg ->
         let (soundModel, command) = 
             updateLocalSoundMessage remote sndMsg model.localSoundModel
-        //Console.WriteLine("Model is " +  soundModel.ToString())
         { model with localSoundModel = soundModel }, command
+    | ServerSoundUpdate serverMsg -> 
+        Console.WriteLine("Server message received " + serverMsg.ToString())
+        // TODO
+        { model with error = None }, Cmd.none
     | Error exn ->
         { model with error = Some exn.Message }, Cmd.none
     | ClearError ->
@@ -187,14 +191,20 @@ type MyApp() =
                 .WithUrl(uri)
                 .Build()
 
-        hubConnection.On<string>(HubNames.soundHubName, fun user -> 
-            let toPrint = "message is " + user
-            Console.WriteLine(toPrint)
-        ) |> ignore
-            
-        hubConnection.StartAsync() |> ignore
+        let subscription initial =
+            let sub dispatch =
+                let fn = fun (serverSoundState: String) ->
+                    let serverState = System.Text.Json.JsonSerializer.Deserialize<ServerSoundModel>(serverSoundState)
+                    dispatch (ServerSoundUpdate serverState) |> ignore
+
+                hubConnection.On<string>(HubNames.soundHubName, fn) |> ignore
+                hubConnection.StartAsync() |> ignore
+                ()
+                    
+            Cmd.ofSub sub
 
         Program.mkProgram (fun _ -> initModel, Cmd.none) update view
+        |> Program.withSubscription subscription
         |> Program.withRouter router
 #if DEBUG
         |> Program.withHotReload
