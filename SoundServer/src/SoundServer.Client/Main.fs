@@ -76,19 +76,22 @@ type Message =
     | GetSoundServerState
     | ClearError
 
-let updateLocalSoundMessage remote (message: LocalSoundMessage) (model: LocalSoundModel) =
-    match message with
-    | ToggleSound ->
-        { model with shouldBePlayingSound = (not model.shouldBePlayingSound) }, Cmd.none
-    | SetFrequency freq ->
-        { model with frequency = freq }, Cmd.none
-    | SetTimerEnabled(hasTimer) -> 
-        { model with hasTimeout = hasTimer }, Cmd.none
-    | SetTimerValue(timerValue) -> 
-        { model with timeoutValue = timerValue }, Cmd.none
-    | ValidateSoundSettings ->
-        let task = Async.StartImmediateAsTask (remote.updateSound(model))
-        model, Cmd.none
+let updateLocalSoundMessage 
+    remote 
+    (message: LocalSoundMessage) 
+    (model: LocalSoundModel) =
+        match message with
+        | ToggleSound ->
+            { model with shouldBePlayingSound = (not model.shouldBePlayingSound) }, Cmd.none
+        | SetFrequency freq ->
+            { model with frequency = freq }, Cmd.none
+        | SetTimerEnabled(hasTimer) -> 
+            { model with hasTimeout = hasTimer }, Cmd.none
+        | SetTimerValue(timerValue) -> 
+            { model with timeoutValue = timerValue }, Cmd.none
+        | ValidateSoundSettings ->
+            let task = Async.StartImmediateAsTask (remote.updateSound(model))
+            model, Cmd.none
 
 let update remote message model =
     match message with
@@ -152,38 +155,45 @@ let getSoundServerState (model: Option<ServerSoundModel>) =
         ]
 
 let soundPage (model: Model) (dispatch: Dispatch<Message>) =
-    Main
-        .Sound()
-        .localSoundModelShouldBePlayingSound(
-            model.localSoundModel.shouldBePlayingSound, 
-            fun n ->
-                dispatch <| LocalSoundMessage ToggleSound
-        )
-        .localSoundModelFrequency(
-            model.localSoundModel.frequency.ToString(), 
-            fun n -> 
-                let freqMsg = SetFrequency (int n)
-                dispatch <| LocalSoundMessage freqMsg
-        )
-        .localSoundModelHasTimeout(
-            model.localSoundModel.hasTimeout, 
-            fun n -> 
-                let msg = SetTimerEnabled n
-                dispatch <| LocalSoundMessage msg
-        )
-        .localSoundModelTimerValue(
-            model.localSoundModel.timeoutValue.ToString(), 
-            fun n -> 
-                let msg = SetTimerValue (int n)
-                dispatch <| LocalSoundMessage msg
-        )
-        .ValidateSoundSettings(fun args -> 
-            dispatch <| LocalSoundMessage ValidateSoundSettings
-        )
-        .ServerSoundState(
-            getSoundServerState model.serverSoundModel
-        )
-        .Elt()
+    let mutable result = 
+        Main
+            .Sound()
+            .localSoundModelShouldBePlayingSound(
+                model.localSoundModel.shouldBePlayingSound, 
+                fun n ->
+                    dispatch <| LocalSoundMessage ToggleSound
+            )
+            .localSoundModelFrequency(
+                model.localSoundModel.frequency.ToString(), 
+                fun n -> 
+                    let freqMsg = SetFrequency (int n)
+                    dispatch <| LocalSoundMessage freqMsg
+            )
+            .localSoundModelHasTimeout(
+                model.localSoundModel.hasTimeout, 
+                fun n -> 
+                    let msg = SetTimerEnabled n
+                    dispatch <| LocalSoundMessage msg
+            )
+            .localSoundModelTimerValue(
+                model.localSoundModel.timeoutValue.ToString(), 
+                fun n -> 
+                    let msg = SetTimerValue (int n)
+                    dispatch <| LocalSoundMessage msg
+            )
+            .ValidateSoundSettings(fun args -> 
+                dispatch <| LocalSoundMessage ValidateSoundSettings
+            )
+            .ServerSoundState(
+                getSoundServerState model.serverSoundModel
+            )
+
+    if not model.localSoundModel.shouldBePlayingSound then
+        result <- result.isFrequencyDisabled("disabled")
+    if (not (model.localSoundModel.shouldBePlayingSound)) || not model.localSoundModel.hasTimeout then
+        result <- result.isTimerDisabled("disabled")
+
+    result.Elt()
 
 let menuItem (model: Model) (page: Page) (text: string) =
     Main.MenuItem()

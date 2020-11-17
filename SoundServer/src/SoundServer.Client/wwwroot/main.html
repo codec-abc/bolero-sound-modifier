@@ -37,17 +37,17 @@
 
           <div class="field">
             <label class="label">Frequency: ${localSoundModelFrequency}</label>
-            <input class="range" type="range" bind="${localSoundModelFrequency}" min="1" max="20" />
+            <input class="range" type="range" bind="${localSoundModelFrequency}" min="1" max="20" disabled="${isFrequencyDisabled}" />
           </div>
 
           <div class="field">
             <label class="label">Has Timer:</label>
-            <input class="checkbox" type="checkbox" bind="${localSoundModelHasTimeout}" />
+            <input class="checkbox" type="checkbox" bind="${localSoundModelHasTimeout}" disabled="${isFrequencyDisabled}" />
           </div>
 
           <div class="field">
             <label class="label">Timer Value: ${localSoundModelTimerValue}</label>
-            <input class="range" type="range" bind="${localSoundModelTimerValue}" min="0" max="60"  />
+            <input class="range" type="range" bind="${localSoundModelTimerValue}" min="0" max="60"  disabled="${isTimerDisabled}" />
           </div>
 
           <button class="button" onclick="${ValidateSoundSettings}">Validate Sound Settings</button>
@@ -56,18 +56,7 @@
         <h1 class="title">Server State</h1>
 
         <div>
-
-
           ${ServerSoundState}
-
-          <!-- <div class="field">
-          </div>
-
-          <div class="field">
-          </div>
-
-          <div class="field">
-          </div> -->
 
         </div>
       </template>
