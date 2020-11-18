@@ -5,4 +5,10 @@ dotnet build SoundServer/src/SoundServer.Client/
 dotnet clean SoundServer/SoundServer.sln && dotnet publish SoundServer/SoundServer.sln -c Release -r linux-arm64
 # then copy ./SoundServer/src/SoundServer.Server/bin/Release/netcoreapp5.0/linux-arm64/ on target (erase all existing files beforehand to start clean)
 # If you use winscp make sure that it don't mess with the file (ie, changing LF to CRLF even on binary files)
-# then go into publish dir and launch server with dotnet SoundServer.Server.dll
+# then go into publish dir and launch server with: dotnet SoundServer.Server.dll
+
+
+# To change sound on linux use: 
+# amixer set Master 100%
+# To play sound use:
+# ffplay -f lavfi -nodisp -i "sine=frequency=8000"
