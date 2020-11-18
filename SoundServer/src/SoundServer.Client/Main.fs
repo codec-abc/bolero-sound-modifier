@@ -44,7 +44,7 @@ let initModel =
         localSoundModel = 
             {
                 shouldBePlayingSound = false
-                frequency = 15
+                frequency = 5
                 hasTimeout = false
                 timeoutValue = 60
             }
