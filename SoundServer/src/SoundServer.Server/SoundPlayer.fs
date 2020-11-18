@@ -12,13 +12,14 @@ module SoundPlayer =
 
     let private callAPlay (frequency: int, logger: ILogger) =
 
+        let scaledFreq = frequency * 1000
         let startInfo = 
             ProcessStartInfo(
                 RedirectStandardOutput = false,
                 RedirectStandardError = false,
                 UseShellExecute = true,
                 FileName = "ffplay",
-                Arguments = " -f lavfi -nodisp -i \"sine=frequency=" + frequency.ToString() + "\"",
+                Arguments = " -f lavfi -nodisp -i \"sine=frequency=" + scaledFreq.ToString() + "\"",
                 CreateNoWindow = false
             )
 

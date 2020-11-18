@@ -134,7 +134,7 @@ let getSoundServerState (model: Option<ServerSoundModel>) =
             else 
                 "❌"
 
-        let frequencyText = if soundModel.frequency.IsSome then soundModel.frequency.Value.ToString() else "No Frequency"
+        let frequencyText = if soundModel.frequency.IsSome then soundModel.frequency.Value.ToString() + " kHz" else "No Frequency"
         let timeoutText = if soundModel.remainingTime.IsSome then soundModel.remainingTime.Value.ToString() else "♾️"
 
         div [] [
